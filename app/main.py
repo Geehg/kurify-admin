@@ -1,6 +1,6 @@
 
-from fastapi import FastAPI, Request, Form
-from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse
+from fastapi import FastAPI, Request
+from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 import json
@@ -20,15 +20,12 @@ def load_db():
 
 @app.get("/", response_class=HTMLResponse)
 async def index(request: Request):
-    db = load_db()
-    return templates.TemplateResponse("index.html", {"request": request, "db": db})
+    return templates.TemplateResponse("console.html", {"request": request, "active_tab": "home", "db": load_db()})
 
 @app.get("/results", response_class=HTMLResponse)
-async def view_results(request: Request):
-    db = load_db()
-    return templates.TemplateResponse("results.html", {"request": request, "db": db})
+async def results(request: Request):
+    return templates.TemplateResponse("console.html", {"request": request, "active_tab": "results", "db": load_db()})
 
 @app.get("/results.json", response_class=JSONResponse)
-async def view_results_json():
-    db = load_db()
-    return db
+async def results_json():
+    return load_db()

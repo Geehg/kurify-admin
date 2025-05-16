@@ -1,0 +1,53 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <title>KURI Console 🎛️</title>
+  <style>
+    body { font-family: sans-serif; margin: 0; background: #f8f9fa; }
+    .nav { display: flex; background: #343a40; padding: 0.8em; }
+    .nav a {
+      color: white; text-decoration: none; padding: 0.5em 1em;
+      margin-right: 0.5em; border-radius: 4px;
+    }
+    .nav a:hover, .nav a.active {
+      background-color: #495057;
+    }
+    .container { padding: 2em; max-width: 900px; margin: auto; background: white; margin-top: 1em; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+    .track { margin-bottom: 1.5em; border-bottom: 1px solid #ddd; padding-bottom: 1em; }
+    img { max-height: 80px; vertical-align: middle; border-radius: 4px; }
+    h1 { color: #222; }
+    small { color: #888; }
+  </style>
+</head>
+<body>
+  <div class="nav">
+    <a href="/" class="{{ 'active' if active_tab == 'home' else '' }}">🎛️ 등록기</a>
+    <a href="/results" class="{{ 'active' if active_tab == 'results' else '' }}">📋 결과 보기</a>
+    <a href="/results.json" target="_blank">🧾 JSON 보기</a>
+  </div>
+
+  <div class="container">
+    {% if active_tab == 'home' %}
+      <h1>🎙️ Kurify Admin 등록기</h1>
+      <p>이곳에서 유튜브 링크 기반으로 fingerprint를 등록하세요. 로그인 필요.</p>
+    {% elif active_tab == 'results' %}
+      <h1>🎧 등록된 곡 목록</h1>
+      {% for id, track in db.items() %}
+        <div class="track">
+          <p><strong>{{ track.title }}</strong> - {{ track.artist }}</p>
+          {% if track.cover %}
+            <img src="{{ track.cover }}" alt="cover">
+          {% endif %}
+          {% if track.url %}
+            <br><a href="{{ track.url }}" target="_blank">iTunes 보기</a>
+          {% endif %}
+          <p><small>ID: {{ id }}</small></p>
+        </div>
+      {% else %}
+        <p>아직 등록된 곡이 없습니다.</p>
+      {% endfor %}
+    {% endif %}
+  </div>
+</body>
+</html>
