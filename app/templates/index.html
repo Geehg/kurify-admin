@@ -1,0 +1,91 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Kurify Admin v0.3 (Login)</title>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+  <style>
+    body { font-family: sans-serif; max-width: 700px; margin: 30px auto; }
+    input, button { padding: 6px; margin: 5px 0; width: 100%; }
+    .track { margin-top: 10px; padding: 10px; border-bottom: 1px solid #ccc; }
+    .error { color: red; }
+    img { max-height: 60px; vertical-align: middle; }
+    #auth-section { margin-bottom: 20px; }
+  </style>
+</head>
+<body>
+  <h1>Kurify Admin 등록기 v0.3 🔐</h1>
+
+  <div id="auth-section">
+    <input type="email" id="email" placeholder="Email">
+    <input type="password" id="password" placeholder="Password">
+    <button onclick="login()">🔓 로그인</button>
+    <button onclick="logout()">🔒 로그아웃</button>
+    <p id="login-status">⏳ 로그인 상태 확인 중...</p>
+  </div>
+
+  <form id="upload-form" action="/register" method="post" style="display:none">
+    <input type="text" name="title" placeholder="곡 제목" required>
+    <input type="text" name="artist" placeholder="아티스트" required>
+    <input type="url" name="youtube_url" placeholder="YouTube 링크" required>
+    <button type="submit">✅ 등록</button>
+  </form>
+
+  <h2>🎵 등록된 곡들</h2>
+  {% for id, track in db.items() %}
+    <div class="track">
+      {% if track.cover %}
+        <img src="{{ track.cover }}">
+      {% endif %}
+      <strong>{{ track.title }}</strong> - {{ track.artist }}<br>
+      <a href="{{ track.url }}" target="_blank">iTunes 보기</a> |
+      <a href="/delete/{{ id }}">🗑️ 삭제</a><br>
+      ID: {{ id }}
+    </div>
+  {% endfor %}
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyDfK-9ZZUVujkdDygzo5gF6XoSSgMnZFyM",
+      authDomain: "kurify-admin-5e6ac.firebaseapp.com",
+      projectId: "kurify-admin-5e6ac",
+      storageBucket: "kurify-admin-5e6ac.firebasestorage.app",
+      messagingSenderId: "887064670746",
+      appId: "1:887064670746:web:f3b80e31a056c0dce117a3"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+
+    function login() {
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+      auth.signInWithEmailAndPassword(email, password)
+        .then(() => {
+          document.getElementById("login-status").textContent = "✅ 로그인됨";
+          document.getElementById("upload-form").style.display = "block";
+        })
+        .catch(err => {
+          document.getElementById("login-status").textContent = "❌ 로그인 실패: " + err.message;
+        });
+    }
+
+    function logout() {
+      auth.signOut().then(() => {
+        document.getElementById("login-status").textContent = "🔒 로그아웃됨";
+        document.getElementById("upload-form").style.display = "none";
+      });
+    }
+
+    auth.onAuthStateChanged(user => {
+      if (user) {
+        document.getElementById("login-status").textContent = "✅ 로그인됨";
+        document.getElementById("upload-form").style.display = "block";
+      } else {
+        document.getElementById("login-status").textContent = "🔒 로그인 필요";
+        document.getElementById("upload-form").style.display = "none";
+      }
+    });
+  </script>
+</body>
+</html>
