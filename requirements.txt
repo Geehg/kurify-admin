@@ -1,7 +1,7 @@
-
 fastapi
 uvicorn
 jinja2
 librosa
 numpy
 yt-dlp
+python-multipart
