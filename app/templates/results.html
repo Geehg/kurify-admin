@@ -1,0 +1,30 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <title>🎧 등록된 곡 목록 - Kurify Admin</title>
+  <style>
+    body { font-family: sans-serif; padding: 2em; max-width: 700px; margin: auto; }
+    .track { margin-bottom: 1.5em; border-bottom: 1px solid #ccc; padding-bottom: 1em; }
+    img { max-height: 80px; vertical-align: middle; }
+    h1 { color: #222; }
+  </style>
+</head>
+<body>
+  <h1>🎧 등록된 곡 목록</h1>
+  {% for id, track in db.items() %}
+    <div class="track">
+      <p><strong>{{ track.title }}</strong> - {{ track.artist }}</p>
+      {% if track.cover %}
+        <img src="{{ track.cover }}" alt="cover">
+      {% endif %}
+      {% if track.url %}
+        <br><a href="{{ track.url }}" target="_blank">iTunes 보기</a>
+      {% endif %}
+      <p><small>ID: {{ id }}</small></p>
+    </div>
+  {% else %}
+    <p>아직 등록된 곡이 없습니다.</p>
+  {% endfor %}
+</body>
+</html>
