@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: kurify-admin
+    name: kurify-admin-results
     env: python
     plan: free
     buildCommand: "pip install -r requirements.txt"
