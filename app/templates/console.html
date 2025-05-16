@@ -1,23 +1,33 @@
-
 <!DOCTYPE html>
 <html>
 <head>
-  <title>KURI Console 🎛️</title>
+  <title>KURI Console 🎛️ (Login + Dark Mode)</title>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
   <style>
-    body { font-family: sans-serif; margin: 0; background: #f8f9fa; }
-    .nav { display: flex; background: #343a40; padding: 0.8em; }
+    body { font-family: sans-serif; margin: 0; background: #121212; color: #f1f1f1; }
+    .nav { display: flex; background: #1f1f1f; padding: 0.8em; }
     .nav a {
-      color: white; text-decoration: none; padding: 0.5em 1em;
+      color: #ccc; text-decoration: none; padding: 0.5em 1em;
       margin-right: 0.5em; border-radius: 4px;
     }
     .nav a:hover, .nav a.active {
-      background-color: #495057;
+      background-color: #333; color: #fff;
     }
-    .container { padding: 2em; max-width: 900px; margin: auto; background: white; margin-top: 1em; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
-    .track { margin-bottom: 1.5em; border-bottom: 1px solid #ddd; padding-bottom: 1em; }
+    .container {
+      padding: 2em; max-width: 900px; margin: auto; background: #1a1a1a;
+      margin-top: 1em; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+    }
+    .track {
+      margin-bottom: 1.5em; border-bottom: 1px solid #444; padding-bottom: 1em;
+    }
     img { max-height: 80px; vertical-align: middle; border-radius: 4px; }
-    h1 { color: #222; }
-    small { color: #888; }
+    input, button {
+      display: block; width: 100%; margin: 0.4em 0; padding: 0.5em;
+      font-size: 1em; border-radius: 4px;
+    }
+    button { background: #333; color: #fff; border: none; }
+    button:hover { background: #444; cursor: pointer; }
   </style>
 </head>
 <body>
@@ -26,11 +36,22 @@
     <a href="/results" class="{{ 'active' if active_tab == 'results' else '' }}">📋 결과 보기</a>
     <a href="/results.json" target="_blank">🧾 JSON 보기</a>
   </div>
-
   <div class="container">
     {% if active_tab == 'home' %}
       <h1>🎙️ Kurify Admin 등록기</h1>
-      <p>이곳에서 유튜브 링크 기반으로 fingerprint를 등록하세요. 로그인 필요.</p>
+      <div id="auth-section">
+        <input type="email" id="email" placeholder="이메일 입력">
+        <input type="password" id="password" placeholder="비밀번호 입력">
+        <button onclick="login()">🔐 로그인</button>
+        <button onclick="logout()">🔓 로그아웃</button>
+        <p id="login-status">⏳ 로그인 상태 확인 중...</p>
+      </div>
+      <form id="upload-form" action="/register" method="post" enctype="multipart/form-data" style="display:none">
+        <input type="text" name="title" placeholder="곡 제목" required>
+        <input type="text" name="artist" placeholder="아티스트" required>
+        <input type="url" name="youtube_url" placeholder="YouTube 링크" required>
+        <button type="submit">✅ 등록</button>
+      </form>
     {% elif active_tab == 'results' %}
       <h1>🎧 등록된 곡 목록</h1>
       {% for id, track in db.items() %}
@@ -49,5 +70,44 @@
       {% endfor %}
     {% endif %}
   </div>
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyDfK-9ZZUVujkdDygzo5gF6XoSSgMnZFyM",
+      authDomain: "kurify-admin-5e6ac.firebaseapp.com",
+      projectId: "kurify-admin-5e6ac"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+
+    function login() {
+      const email = document.getElementById("email").value;
+      const pw = document.getElementById("password").value;
+      auth.signInWithEmailAndPassword(email, pw)
+        .then(() => {
+          document.getElementById("login-status").textContent = "✅ 로그인됨";
+          document.getElementById("upload-form").style.display = "block";
+        })
+        .catch(err => {
+          document.getElementById("login-status").textContent = "❌ 로그인 실패: " + err.message;
+        });
+    }
+
+    function logout() {
+      auth.signOut().then(() => {
+        document.getElementById("login-status").textContent = "🔓 로그아웃됨";
+        document.getElementById("upload-form").style.display = "none";
+      });
+    }
+
+    auth.onAuthStateChanged(user => {
+      if (user) {
+        document.getElementById("login-status").textContent = "✅ 로그인됨";
+        document.getElementById("upload-form").style.display = "block";
+      } else {
+        document.getElementById("login-status").textContent = "🔒 로그인 필요";
+        document.getElementById("upload-form").style.display = "none";
+      }
+    });
+  </script>
 </body>
 </html>
