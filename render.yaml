@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: kurify-console-auto
+    name: kurify-console-manage
     env: python
     plan: free
     buildCommand: "pip install -r requirements.txt"
