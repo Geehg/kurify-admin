@@ -67,6 +67,11 @@ async def results(request: Request):
     db = load_db()
     return templates.TemplateResponse("console.html", {"request": request, "active_tab": "results", "db": db})
 
+@app.get("/manage", response_class=HTMLResponse)
+async def manage(request: Request):
+    db = load_db()
+    return templates.TemplateResponse("manage.html", {"request": request, "db": db})
+
 @app.get("/results.json", response_class=JSONResponse)
 async def results_json():
     return load_db()
@@ -97,3 +102,11 @@ async def register_track(request: Request, youtube_url: str = Form(...)):
             "error": str(e),
             "db": load_db()
         })
+
+@app.post("/delete/{track_id}")
+async def delete_track(track_id: str):
+    db = load_db()
+    if track_id in db:
+        del db[track_id]
+        save_db(db)
+    return RedirectResponse("/manage", status_code=302)
