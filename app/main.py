@@ -110,3 +110,86 @@ async def delete_track(track_id: str):
         del db[track_id]
         save_db(db)
     return RedirectResponse("/manage", status_code=302)
+
+@app.get("/search", response_class=HTMLResponse)
+async def search(request: Request):
+    db = load_db()
+    return templates.TemplateResponse("search.html", {"request": request, "db": db})
+
+from collections import Counter
+
+@app.get("/dashboard", response_class=HTMLResponse)
+async def dashboard(request: Request):
+    db = load_db()
+    total = len(db)
+    artist_counter = Counter()
+    for item in db.values():
+        artist_counter[item.get("artist", "Unknown")] += 1
+    top_artists = artist_counter.most_common(5)
+    max_count = top_artists[0][1] if top_artists else 1
+    return templates.TemplateResponse("dashboard.html", {
+        "request": request,
+        "total": total,
+        "top_artists": top_artists,
+        "max_count": max_count
+    })
+
+
+@app.post("/api/register")
+async def api_register(youtube_url: str = Form(...)):
+    try:
+        wav_path, yt_title = download_youtube_audio(youtube_url)
+        fingerprint = extract_fingerprint(wav_path)
+        os.remove(wav_path)
+        meta = fetch_itunes_meta(yt_title)
+        track_id = f"kurify_{uuid.uuid4().hex[:8]}"
+        db = load_db()
+        db[track_id] = {
+            "title": meta["title"],
+            "artist": meta["artist"],
+            "album": meta["album"],
+            "cover": meta["cover"],
+            "url": meta["url"],
+            "fingerprint": fingerprint
+        }
+        save_db(db)
+        return {"status": "success", "track_id": track_id, "meta": meta}
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
+
+@app.get("/api/track/{track_id}", response_class=JSONResponse)
+async def api_get_track(track_id: str):
+    db = load_db()
+    if track_id in db:
+        return db[track_id]
+    return JSONResponse(content={"error": "track not found"}, status_code=404)
+
+
+from fastapi import UploadFile
+import tempfile
+
+@app.post("/api/upload")
+async def upload_file(file: UploadFile):
+    try:
+        suffix = "." + file.filename.split(".")[-1]
+        with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp:
+            tmp.write(await file.read())
+            tmp_path = tmp.name
+
+        fingerprint = extract_fingerprint(tmp_path)
+        os.remove(tmp_path)
+
+        track_id = f"kurify_{uuid.uuid4().hex[:8]}"
+        db = load_db()
+        db[track_id] = {
+            "title": "Unknown Title",
+            "artist": "Unknown Artist",
+            "album": "",
+            "cover": "",
+            "url": "",
+            "fingerprint": fingerprint
+        }
+        save_db(db)
+        return {"status": "success", "track_id": track_id}
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
