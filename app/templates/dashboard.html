@@ -1,0 +1,49 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <title>KURI Console 🎛️ 대시보드</title>
+  <style>
+    body { font-family: sans-serif; margin: 0; background: #121212; color: #f1f1f1; }
+    .nav { display: flex; background: #1f1f1f; padding: 0.8em; }
+    .nav a {
+      color: #ccc; text-decoration: none; padding: 0.5em 1em;
+      margin-right: 0.5em; border-radius: 4px;
+    }
+    .nav a:hover, .nav a.active { background-color: #333; color: #fff; }
+    .container {
+      padding: 2em; max-width: 900px; margin: auto; background: #1a1a1a;
+      margin-top: 1em; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+    }
+    .stat { margin-bottom: 1.5em; font-size: 1.2em; }
+    .highlight { font-size: 2em; font-weight: bold; color: #00d1b2; }
+    .bar { background: #2c2c2c; height: 16px; margin: 5px 0; border-radius: 3px; overflow: hidden; }
+    .bar span { display: block; height: 100%; background: #00bc8c; }
+  </style>
+</head>
+<body>
+  <div class="nav">
+    <a href="/">🎛️ 등록기</a>
+    <a href="/results">📋 결과 보기</a>
+    <a href="/results.json" target="_blank">🧾 JSON 보기</a>
+    <a href="/manage">🛠️ 등록 관리</a>
+    <a href="/search">🔍 검색</a>
+    <a href="/dashboard" class="active">📊 대시보드</a>
+  </div>
+
+  <div class="container">
+    <h1>📊 등록 통계</h1>
+    <div class="stat">총 등록된 곡 수: <span class="highlight">{{ total }}</span></div>
+
+    {% if top_artists %}
+      <h2>🎤 아티스트별 등록 순위</h2>
+      {% for artist, count in top_artists %}
+        <div>{{ artist }} ({{ count }})</div>
+        <div class="bar"><span style="width: {{ (count / max_count) * 100 }}%"></span></div>
+      {% endfor %}
+    {% else %}
+      <p>등록된 곡이 없습니다.</p>
+    {% endif %}
+  </div>
+</body>
+</html>
